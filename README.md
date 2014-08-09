@@ -2,6 +2,7 @@ Bootstrap DateClockTime Picker
 ==============================
 
 WHAT IS THIS?
+
 A mix of a Bootstrap DatePicker and a ClockTimePicker in one control.
 Let's say you want a mix of this (or the bootstrap standar one): https://github.com/smalot/bootstrap-datetimepicker
 And this: https://github.com/weareoutman/clockpicker
@@ -38,4 +39,5 @@ ROADMAP:
 * What ever you think is cool for this component...
 
 ENJOY!
+
 :-)
