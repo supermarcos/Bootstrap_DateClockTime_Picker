@@ -21,11 +21,12 @@ FEATURES:
 
 
 TO-DO:
-* Select time and put the right value in the input
+* Select time and put the right value in the input (support input!)
+* Support 12 or 24 hours config.
 * Support time options and configurations
 * Display correctly today and other buttons in date views
 * Display correctly PM-AM buttons in time view
-* Display the full date and time on the top of the time view
+* Display the full date and time on the top of the time view (display it as well while changing in the clock picker)
 * Hide backward and forward buttons in time view
 * Clean-up code
 * Raise events when something happen (when initialized, when selected date, when selected time...)

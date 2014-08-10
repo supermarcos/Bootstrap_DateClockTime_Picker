@@ -1,24 +1,11 @@
-/* =========================================================
- * bootstrap-datepicker.js
- * Repo: https://github.com/eternicode/bootstrap-datepicker/
- * Demo: http://eternicode.github.io/bootstrap-datepicker/
- * Docs: http://bootstrap-datepicker.readthedocs.org/
- * Forked from http://www.eyecon.ro/bootstrap-datepicker
- * =========================================================
- * Started by Stefan Petre; improvements by Andrew Rowls + contributors
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * ========================================================= */
+/* =====================================================================
+ * bootstrap date and clock time picker
+ * Repo: https://github.com/supermarcos/Bootstrap_DateClockTime_Picker
+ * Created by Marcos Morales Rodrigo (supermarcos.net) in August 2014
+ * A mix of this: https://github.com/smalot/bootstrap-datetimepicker
+ * and this: https://github.com/weareoutman/clockpicker
+ * Licence: Absolutely free to use, fork, edit... it is up to you
+ * ===================================================================== */
 
 (function($, undefined){
 
@@ -995,32 +982,36 @@
 		
 		// Hours and minutes are selected
 		done: function() {
-		
-			// TODO: assign the date to the input and underneath property
+			debugger;
+			var timeValue = [];
+			timeValue.push(leadingZero(this.hours));
+			timeValue.push(leadingZero(this.minutes));
 			
-			// raiseCallback(this.options.beforeDone);
-			/*
-			this.hide();
-			var last = this.input.prop('value'),
-				value = leadingZero(this.hours) + ':' + leadingZero(this.minutes);
-			if  (this.options.twelvehour) {
-				value = value + this.amOrPm;
-			}
+			// This component shouldn't allow tick several dates, so always is going to be the zero position in the array:
+			this.dates[0] = time.dates[0].setHours(timeValue[0]).setMinutes(timeValue[1]);
 			
-			this.input.prop('value', value);
-			if (value !== last) {
-				this.input.triggerHandler('change');
-				if (! this.isInput) {
-					this.element.trigger('change');
+			// TODO: print the result in the header?
+			
+			// change the input's value if exists:
+			if (this.input) {
+				// TODO:
+				/*
+				if  (this.options.twelvehour) {  
+					value = value + this.amOrPm;
 				}
+				*/
+				
+				var last = this.input.prop('value');
+				this.input.prop('value', value);
+				if (value !== last) {
+					this.input.triggerHandler('change');
+					if (! this.isInput) {
+						this.element.trigger('change');
+					}
+				}
+
 			}
 
-			if (this.options.autoclose) {
-				this.input.trigger('blur');
-			}
-			*/
-
-			// raiseCallback(this.options.afterDone);
 		},
 		/* << */
 
