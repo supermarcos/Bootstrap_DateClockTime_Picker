@@ -544,11 +544,85 @@
 		_zero_utc_time: function(utc){
 			return utc && new Date(Date.UTC(utc.getUTCFullYear(), utc.getUTCMonth(), utc.getUTCDate()));
 		},
+		
+		/*
+		Functions to get/set times and the whole selected datetime value
+		>>
+		*/
+		getTime: function() {
+			if (this.hours && this.minutes) {
+				return this.hours + ":" + this.minutes;
+			} else {
+				return "00:00";
+			}
+		},
+		
+		setTime: function() {
+			var value = arguments[0];
+			var self = this;
+			self.hours = 0;
+			self.minutes = 0;
+			if (typeof value === 'string') {
+				var sTime = value.split(':');
+				if(sTime.length == 2){
+					var hours = parseInt(sTime[0], 10)||0;
+					if(hours > 23){
+						hours = 0;
+					}
+					self.hours = hours;
+					var minutes = parseInt(sTime[1], 10)||0;
+					if(minutes > 59) {
+						minutes = 0;
+					}
+					self.minutes = minutes;
+				}
+			} else if (value instanceof Date){
+				self.hours = value.getHours();
+				self.minutes = value.getMinutes();
+			}
+		},
+		
+		getDateTime: function() {
+			var dt = null;
+			if(this.getFormattedDate() && this.getTime())
+				return this.getFormattedDate() + " " + this.getTime();
+			else
+				return null;
+		},
 
+		_setDateTime: function() {
+			var value = arguments[0];
+			if(value == this.getDateTime()){
+				return false;
+			}
+			if (value instanceof Date) {
+				// TODO: use setDate??
+				this.date = new Date(value.getFullYear(), value.getMonth(), value.getDate());
+				// TODO: use setTime??
+				this.time = value.getHours() + ":" + value.getMinutes();
+			} else if (typeof value === 'string') {
+				// TODO: it depends on the format string... do we have a right format string at this stage??
+				var thisDate = new Date(value);
+				this.date = UTCDate(new Date(thisDate.getFullYear(), thisDate.getMonth(), thisDate.getDate()));
+				this.time = thisDate.getHours() + ":" + thisDate.getMinutes();
+			}
+			this.dates[0] = this.date;
+			this.setTime(this.time);
+		},
+
+		setDateTime: function() {
+			_setDateTime(arguments[0]);
+			this.setDate(this.date.toLocaleDateString());
+		},
+		
+		/*
+		<<
+		*/
+		
 		getDates: function(){
 			return $.map(this.dates, this._utc_to_local);
 		},
-
+		
 		getUTCDates: function(){
 			return $.map(this.dates, function(d){
 				return new Date(d);
@@ -988,9 +1062,13 @@
 			timeValue.push(leadingZero(this.minutes));
 			
 			// This component shouldn't allow tick several dates, so always is going to be the zero position in the array:
-			this.dates[0] = time.dates[0].setHours(timeValue[0]).setMinutes(timeValue[1]);
+			var selectedDate = this.getDate();
+			if(!selectedDate)
+				selectedDate = new Date();
+			this._setDateTime(new Date(new Date(selectedDate.setHours(timeValue[0])).setMinutes(timeValue[1])));
 			
-			// TODO: print the result in the header?
+			// TODO: print the result in the header
+			this._displayDateTime(this.getDateTime()); 
 			
 			// change the input's value if exists:
 			if (this.input) {
@@ -1012,6 +1090,34 @@
 
 			}
 
+		},
+		
+		// Sets selected date and time in the timeview header
+		_displayDateTime: function(value) {
+			if(value){
+				if (value instanceof Date){
+					this.hours = value.getHours();
+					this.minutes = value.getMinutes();
+				} else {
+					if (value[0] === 'now') {
+						var now = new Date(+ new Date() + this.options.fromnow);
+						value = [
+							now.getHours(),
+							now.getMinutes()
+						];
+					}
+					this.hours = + value[0] || 0;
+					this.minutes = + value[1] || 0;
+				}
+			} else {
+				this.hours = 0;
+				this.minutes = 0;
+			}
+			this.spanHours.html(leadingZero(this.hours));
+			this.spanMinutes.html(leadingZero(this.minutes));
+			
+			// print the result in the header
+			this.picker.find('.datepicker-clock').find('th:eq(1)').text(this.getFormattedDate() + " " + this.spanHours.html() + ":" + this.spanMinutes.html()).end().find('td');
 		},
 		/* << */
 
@@ -1144,7 +1250,7 @@
 			}
 			yearCont.html(html);
 			
-			// TODO: Clock view:
+			// Clock view:
 			html = '<tr>'+
 						'<td colspan="7">'+
 							'<div class="clockpicker-plate" style="margin: auto;">'+
@@ -1435,12 +1541,23 @@
 			}
 
 			html = plate;
-					
-			var clockHead = this.picker.find('.datepicker-clock').find('th:eq(1)').text('daterr').end().find('td');
+
+			// TODO: suggest now datetime instead of 00:00?
+			//var startingTime = [dates[0].getHours(), dates[0].getMinutes()];
+			//var clockHead = this.picker.find('.datepicker-clock').find('th:eq(1)').text('daterr').end().find('td');
+			
 			var clockCont = this.picker.find('.datepicker-clock tbody #contClock').empty().append(html);
 
 			// Get the time
-			var value = 'now'; // TODO: ((this.input.prop('value') || this.options['default'] || '') + '').split(':');
+			/*
+			var value = this.getDateTime(); // TODO: ((this.input.prop('value') || this.options['default'] || '') + '').split(':');
+			if(!value){
+				value = new Date();
+				this.setDateTime(value);
+			}
+			*/
+			
+			/*
 			if (value[0] === 'now') {
 				var now = new Date(+ new Date() + this.options.fromnow);
 				value = [
@@ -1452,6 +1569,10 @@
 			this.minutes = + value[1] || 0;
 			this.spanHours.html(leadingZero(this.hours));
 			this.spanMinutes.html(leadingZero(this.minutes));
+			*/
+			
+			this._displayDateTime(this.getDateTime()); //(value);
+			//var clockHead = this.picker.find('.datepicker-clock').find('th:eq(1)').text(this.spanHours.html() + ":" + this.spanMinutes.html()).end().find('td');
 
 			// Toggle to hours view
 			this.toggleView('hours');
@@ -1506,7 +1627,7 @@
 					}
 					break;
 				case 0:
-					// clock view
+					// TODO: clock view
 					break;
 			}
 		},
@@ -1537,11 +1658,20 @@
 											this._trigger('changeYear', this.viewDate);
 										break;
 									case 0:
-										// clock navigation... display it?
-										debugger;
+										// clock navigation (in this case is to jump between hours and minutes)
+										if (dir > 0) {
+											if (this.currentView === 'hours') {
+												this.toggleView('minutes', duration / 2);
+											}
+										} else {
+											if (this.currentView === 'minutes') {
+												this.toggleView('hours', duration / 2);
+											}
+										}
 										break;
 								}
-								this.fill();
+								if(this.viewMode != 0)
+									this.fill(); // this option is redrawing everything, but in the case of the clock that's not good, TODO: maybe it shouldn't in any case...
 								break;
 							case 'today':
 								var date = new Date();
@@ -1617,8 +1747,9 @@
 								}
 							}
 							this._setDate(UTCDate(year, month, day));
+							this._setDateTime(UTCDate(year, month, day));
 							this.showMode(-1);
-							this.fill();
+							// TODO: Is it needed? -> this.fill();
 						}
 						break;
 				}
@@ -2259,7 +2390,13 @@
 							'</div>'+
 							'<div class="datepicker-clock">'+
 								'<table class="table-condensed">'+
-									DPGlobal.headTemplate+
+									'<thead>'+
+										'<tr>'+
+											'<th class="prev">H</th>'+
+											'<th colspan="5" class="datepicker-switch"></th>'+
+											'<th class="next">M</th>'+
+										'</tr>'+
+									'</thead>'+
 									'<tbody><tr><td id="contClock" colspan="7"></td></tr></tbody>'+
 									DPGlobal.footTemplate+
 								'</table>'+
